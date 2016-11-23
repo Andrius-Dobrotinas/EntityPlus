@@ -9,14 +9,17 @@ using System.Linq;
 namespace AndrewD.EntityPlus
 {
     /// <summary>
-    /// Provides a way to retrieve Object Context entity metadata
+    /// Provides a way to retrieve Object Context entity metadata.
+    /// TODO: Unfortunately, it is able to only see base entity sets, not derived ones therefore, for derived entity sets,
+    /// navigation property getters will only return those navigation properties that are defined in a corresponding
+    /// base entity set.
     /// </summary>
     public class DbContextReflector : IDbContextReflector
     {
         public ObjectContext ObjectContext { get; }
         private EntityContainer entityContainer;
         private Dictionary<Type, EntitySetBase> entities;
-        // TODO: do something about this:
+        // TODO: make it DI'able?
         private EntityRelationshipResolver relationshipResolver = new EntityRelationshipResolver();
 
 
@@ -31,7 +34,6 @@ namespace AndrewD.EntityPlus
         public DbContextReflector(IObjectContextAdapter objectContextAdapter, string modelsNamespace, string modelAssemblyName)
             : this(objectContextAdapter.ObjectContext, modelsNamespace, modelAssemblyName)
         {
-
         }
 
         /// <param name="objectContextAdapter">Object context that is to be interrogated</param>

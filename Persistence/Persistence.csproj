@@ -49,6 +49,7 @@
     <Compile Include="CollectionUpdaters\CollectionMerger.cs" />
     <Compile Include="CollectionUpdaters\CollectionPropertyUpdater.cs" />
     <Compile Include="CollectionUpdaters\ReflectingGenericCollectionPropertyUpdater.cs" />
+    <Compile Include="DefaultEntityChangesMerger.cs" />
     <Compile Include="EntityUpdaters\EntityUpdater.cs" />
     <Compile Include="EntityUpdaters\EntityUpdaterBase.cs" />
     <Compile Include="EntityUpdaters\NavigationPropertyUpdater.cs" />
@@ -56,6 +57,7 @@
     <Compile Include="EntityUpdaters\ScalarPropertyUpdater.cs" />
     <Compile Include="ICollectionMerger.cs" />
     <Compile Include="ICollectionPropertyUpdater.cs" />
+    <Compile Include="IEntityChangesMerger.cs" />
     <Compile Include="IEntityUpdater.cs" />
     <Compile Include="IRecursiveEntityUpdater.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
