@@ -100,7 +100,7 @@ namespace RecordLabel.TheContext
 
             // TRACKS
             var track1 = new Track { Title = "Search And Destroy" };
-            track1.Reference = new TrackReference { Target = "http://www.google.com", Type = ReferenceType.Website };
+            track1.Reference = "http://www.google.com";
             release1.Tracks.Add(track1);
 
             var track2 = new Track { Title = "Blank" };
@@ -108,7 +108,7 @@ namespace RecordLabel.TheContext
             db.SaveChanges();
 
             var track3 = new Track { Title = "Gotcha!" };
-            track3.Reference = new TrackReference { Target = "http://www.youtube.com", Type = ReferenceType.Youtube }; ;
+            track3.Reference = "http://www.youtube.com";
 
             release1.Tracks.Add(track3);
 

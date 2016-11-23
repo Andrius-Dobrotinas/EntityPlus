@@ -23,7 +23,6 @@ namespace RecordLabel.TheContext
         public DbSet<Metadata> Metadata { get; set; }
         public DbSet<Reference> References { get; set; }
         public DbSet<Track> Tracks { get; set; }
-        public DbSet<TrackReference> TrackReferences { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
@@ -45,16 +44,6 @@ namespace RecordLabel.TheContext
             modelBuilder.Entity<Release>()
                 .HasMany(x => x.Tracks)
                 .WithRequired(x => x.Release);
-
-            modelBuilder.Entity<Track>()
-                .HasOptional(x => x.Reference)
-                .WithRequired(x => x.Track)
-                .WillCascadeOnDelete();
-
-            modelBuilder.Entity<TrackReference>()
-                .HasRequired(x => x.Track)
-                .WithOptional(x => x.Reference)
-                .WillCascadeOnDelete();
 
             modelBuilder.Entity<Release>().ToTable("Releases");
             modelBuilder.Entity<Artist>().ToTable("Artists");

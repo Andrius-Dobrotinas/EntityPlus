@@ -15,6 +15,6 @@ namespace RecordLabel.TheContext
         [Required]
         public string Title { get; set; }
 
-        public virtual TrackReference Reference { get; set; }
+        public string Reference { get; set; }
     }
 }
