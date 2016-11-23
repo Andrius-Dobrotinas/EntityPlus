@@ -5,16 +5,16 @@ using System.Linq;
 
 namespace AndrewD.EntityPlus
 {
-    public sealed class EntityNavigationPropertyInfo
+    public sealed class EntityNavigationPropertyInfo : NavigationPropertyInfo
     {
         private const string PropertyInfoMetadataName = "ClrPropertyInfo";
 
         public NavigationProperty Property { get; }
         public string PropertyName => Property.Name;
-        public System.Reflection.PropertyInfo PropertyInfo { get; }
+        
         public Type ReferencedEntityType => PropertyInfo.PropertyType;
-        public bool ReferencedEntityIsDependent { get; }
-        public OperationAction ReferencedEntityDeleteBehavior { get; }
+        
+        
         public EntityRelationshipType Relationship { get; }
 
         public EntityNavigationPropertyInfo(NavigationProperty property, EntityRelationshipResolver relationshipResolver)

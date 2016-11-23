@@ -19,6 +19,8 @@ namespace AndrewD.EntityPlus.Persistence
         public TEntity UpdateEntity<TEntity>(TEntity model, IRecursiveEntityUpdater updater)
             where TEntity : class
         {
+            if (model == null) return null;
+
             // Update scalar properties
             TEntity updatedModel = UpdateEntity<TEntity>(model);
 
