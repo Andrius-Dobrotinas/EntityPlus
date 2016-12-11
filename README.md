@@ -1,6 +1,6 @@
 # EntityPlus
 An Entity Framework extension library that aims to provide tools for easier entity manipulation.
-This project is a result of restructurization of the RecordLabel project.
+This project is a result of restructurization of the https://github.com/Andrius-Dobrotinas/RecordLabel project.
 
 So far, it comprises facilities for:
 * retrieving entity metadata, such as primary keys, navigation properties and their relationship types, from DbContext.
