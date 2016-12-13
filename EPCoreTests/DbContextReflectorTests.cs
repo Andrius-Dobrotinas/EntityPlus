@@ -35,7 +35,7 @@ namespace EPCoreTests
             Assert.AreEqual(1, navProperties.Length, "Wrong number of navigational properties found");
         }
 
-        [TestMethod]
+        /*[TestMethod]
         public void GetCollectionNavigationProperties_MustFindCollectionNavigationalPropertiesInBaseEntity()
         {
             var navProperties = reflector.GetCollectionNavigationProperties<Release>();
@@ -44,6 +44,6 @@ namespace EPCoreTests
             Assert.AreNotEqual(null, navProperties.FirstOrDefault(x => x.PropertyName == "References"), "Collection Navigation property for References not found");
 
             Assert.AreEqual(1, navProperties.Length, "Wrong number of collection navigational properties found");
-        }
+        }*/
     }
 }
