@@ -16,6 +16,6 @@ namespace AndrewD.EntityPlus
         /// <param name="keyProperties">A list of properties whose values must be extracted from
         /// entities and which must be used for comparison</param>
         /// <returns></returns>
-        bool CompareEntities<TEntity>(TEntity first, TEntity second, IList<EntityKeyPropertyInfo> keyProperties);
+        bool CompareEntities<TEntity>(TEntity first, TEntity second, IList<IEntityKeyPropertyInfo> keyProperties);
     }
 }

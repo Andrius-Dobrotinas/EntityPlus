@@ -17,7 +17,7 @@ namespace AndrewD.EntityPlus.Persistence
         /// Adds, updates or removes entries from the Target collection based on values in the New collection using the specified primary keys
         /// </summary>
         public List<TEntry> MergeCollections<TEntry>(IList<TEntry> targetCollection, IList<TEntry> newCollection,
-            IList<EntityKeyPropertyInfo> keyProperties,
+            IList<IEntityKeyPropertyInfo> keyProperties,
             Func<TEntry, TEntry, TEntry> getUpdateEntry, Func<TEntry, TEntry> addEntry,
             Action<IList<TEntry>> removeEntriesFromCollection)
             where TEntry : class

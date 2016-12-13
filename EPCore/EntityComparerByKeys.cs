@@ -9,7 +9,7 @@ namespace AndrewD.EntityPlus
     /// </summary>
     public class EntityComparerByKeys : IEntityComparerByKeys
     {
-        public bool CompareEntities<TEntity>(TEntity first, TEntity second, IList<EntityKeyPropertyInfo> keyProperties)
+        public bool CompareEntities<TEntity>(TEntity first, TEntity second, IList<IEntityKeyPropertyInfo> keyProperties)
         {
             if (first == null)
                 throw new ArgumentNullException(nameof(first));
@@ -34,7 +34,7 @@ namespace AndrewD.EntityPlus
             return true;
         }
 
-        protected virtual IEnumerable<EntityKeyPropertyInfo> FilterKeys(IList<EntityKeyPropertyInfo> keyProperties)
+        protected virtual IEnumerable<IEntityKeyPropertyInfo> FilterKeys(IList<IEntityKeyPropertyInfo> keyProperties)
         {
             return keyProperties;
         }

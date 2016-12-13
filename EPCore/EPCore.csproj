@@ -46,6 +46,7 @@
     <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="IEntityKeyPropertyInfo.cs" />
     <Compile Include="NavigationPropertyInfo.cs" />
     <Compile Include="DbContextReflector.cs" />
     <Compile Include="EntityComparerByKeys.cs" />

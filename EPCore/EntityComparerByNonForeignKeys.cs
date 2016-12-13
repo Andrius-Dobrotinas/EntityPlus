@@ -10,7 +10,7 @@ namespace AndrewD.EntityPlus
     /// </summary>
     public class EntityComparerByNonForeignKeys : EntityComparerByKeys
     {
-        protected override IEnumerable<EntityKeyPropertyInfo> FilterKeys(IList<EntityKeyPropertyInfo> keyProperties)
+        protected override IEnumerable<IEntityKeyPropertyInfo> FilterKeys(IList<IEntityKeyPropertyInfo> keyProperties)
         {
             return keyProperties.Where(x => x.IsForeignKey == false);
         }

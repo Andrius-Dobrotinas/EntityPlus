@@ -108,7 +108,7 @@ namespace AndrewD.EntityPlus.Persistence
                 }
                 else
                 {
-                    var keyProperties = Reflector.GetKeyProperties<TCollectionEntry>();
+                    IEntityKeyPropertyInfo[] keyProperties = Reflector.GetKeyProperties<TCollectionEntry>();
                     // Add/Update (or Attach, if entities are not dependent upon the model) / Remove entries
                     var updatedCollection = CollectionMerger.MergeCollections(targetCollection, newCollection,
                         keyProperties,

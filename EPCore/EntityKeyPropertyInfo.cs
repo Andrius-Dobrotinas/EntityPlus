@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AndrewD.EntityPlus
 {
-    public sealed class EntityKeyPropertyInfo : EntityScalarPropertyInfo
+    public sealed class EntityKeyPropertyInfo : EntityScalarPropertyInfo, IEntityKeyPropertyInfo
     {
         public int? Order { get; }
         public bool IsForeignKey => RelatedNavigationProperty != null;
