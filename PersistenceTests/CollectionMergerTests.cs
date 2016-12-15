@@ -5,7 +5,6 @@ using System.Linq;
 using AndrewD.EntityPlus.Persistence;
 using AndrewD.EntityPlus;
 
-//// TODO: prepare fake DbContext and then write tests
 namespace RepositoryTests
 {
     [TestClass]
@@ -19,8 +18,201 @@ namespace RepositoryTests
             IEntityComparerByKeys comparer = new EntityComparerByNonForeignKeys();
             merger = new CollectionMerger(comparer);
         }
+                
+        [TestMethod]
+        public void EachEntryInResultingCollectionMustHaveNoMoreThanOneMatchInTheNewOrOriginalCollection()
+        {
+            var originalCollection = GetOriginalCollection();
+            var keyProperties = GetKeyPropertiesMock();
+            var newCollection = new List<TestClass>()
+            {
+                new TestClass { Id = 1,Value = "target 1" }
+            };
 
-        private List<TestClass> GenerateOriginalCollection()
+
+            // Run test
+            var resultingCollection = Merge(originalCollection, newCollection, keyProperties);
+
+            // Make sure each entry in Resulting collection has no more than one match in the New or Original collection
+            foreach (var item in resultingCollection)
+            {
+                Assert.IsFalse(newCollection.Count(x => x == item) > 1, "Entry in Resulting collection has more than 1 match in New collection");
+                Assert.IsFalse(originalCollection.Count(x => x == item) > 1, "Entry in Resulting collection has more than 1 match in Original collection");
+
+                Assert.IsNotNull(newCollection.SingleOrDefault(x => x == item)
+                    ?? originalCollection.SingleOrDefault(x => x == item),
+                    "Resulting collection doesn't contain items that aren't present in the new collection");
+            }
+        }
+
+        [TestMethod]
+        public void MustRemoveItemsFromCollection()
+        {
+            var originalCollection = GetOriginalCollection();
+            var keyProperties = GetKeyPropertiesMock();
+            var newCollection = GetNewCollection_OneItem();
+            var expectedNumberOfRemovedItems = 2;
+
+            // Run test
+            IList<TestClass> removedEntries = null;
+            var resultingCollection = Merge(originalCollection, newCollection, keyProperties, ref removedEntries);
+
+            Assert.IsNotNull(removedEntries, "Entries are supposed to be removed");
+
+            Assert.AreEqual(newCollection.Count, resultingCollection.Count, "Resulting collection is supposed to have the same number of entries as the New Collection");
+
+            Assert.AreEqual(expectedNumberOfRemovedItems, removedEntries.Count, "Removed wrong number of entries");
+
+            // Make sure removed entries are not present in the Resulting collection
+            foreach (var item in removedEntries)
+            {
+                Assert.AreEqual(0, resultingCollection.Count(x => x == item), "Resulting collection may not contain entries that are in the collection of removed entries");
+            }
+        }
+
+        [TestMethod]
+        public void MustRemoveItemsFromCollection_OnlyItemsInOriginalCollectionMayBeRemoved()
+        {
+            var originalCollection = GetOriginalCollection();
+            var keyProperties = GetKeyPropertiesMock();
+            var newCollection = GetNewCollection_OneItem();
+
+            // Run test
+            IList<TestClass> removedEntries = null;
+            var resultingCollection = Merge(originalCollection, newCollection, keyProperties, ref removedEntries);
+            
+            foreach (var item in removedEntries)
+            {
+                Assert.IsTrue(newCollection.Count(x => x == item) == 0, "Collection of removed entries is not supposed to contain entries from the New collection");
+            }
+        }
+
+        [TestMethod]
+        public void RemoveAllAndAdd1()
+        {
+            var originalCollection = GetOriginalCollection();
+            var keyProperties = GetKeyPropertiesMock();
+            
+            // New collectain contains an items that's not present in the original collection (different Id)
+            var newCollection = new List<TestClass>()
+            {
+                new TestClass { Id = 0,Value = "target 2" }
+            };
+
+            // Run test
+            var resultingCollection = Merge(originalCollection, newCollection, keyProperties);
+
+            Assert.AreEqual(1, resultingCollection.Count, "Resulting collection is supposed to contain exactly one item");
+            Assert.AreEqual(newCollection[0], resultingCollection[0], "Resulting collection is supposed to contain the new item");
+        }
+
+        [TestMethod]
+        public void MustNotRemoveAnyEntriesWhenUpdating()
+        {
+            var originalCollection = GetOriginalCollection();
+            var keyProperties = GetKeyPropertiesMock();
+            var newCollection = GetOriginalCollection();
+
+            var newValue = "New value";
+            newCollection[1].Value = newValue;
+
+            // Run test
+            IList<TestClass> removedEntries = null;
+            var resultingCollection = Merge(originalCollection, newCollection, keyProperties, ref removedEntries);
+
+            Assert.IsNull(removedEntries, "Not supposed to remove any entries when simply updating existing entries");
+        }
+
+        [TestMethod]
+        public void MustUpdate1Item()
+        {
+            var originalCollection = GetOriginalCollection();
+            var keyProperties = GetKeyPropertiesMock();
+            var newCollection = GetOriginalCollection();
+
+            var newValue = "New value";
+            newCollection[1].Value = newValue;
+                    
+            // Run test
+            var resultingCollection = Merge(originalCollection, newCollection, keyProperties);
+
+            Assert.IsNotNull(resultingCollection.SingleOrDefault(x => x.Value == newValue), "Resulting collection must contain the entry with the new value");
+        }
+
+        [TestMethod]
+        public void MustUpdateMultipleItems()
+        {
+            var originalCollection = GetOriginalCollection();
+            var keyProperties = GetKeyPropertiesMock();
+            var newCollection = GetOriginalCollection();
+
+            var newValue = "New value";
+            var newValue2 = "New value Too";
+            newCollection[1].Value = newValue;
+            newCollection[2].Value = newValue2;
+
+            // Run test
+            var resultingCollection = Merge(originalCollection, newCollection, keyProperties);
+            
+            Assert.IsNotNull(resultingCollection.SingleOrDefault(x => x.Value == newValue), "Resulting collection must contain the entry with the new value");
+            Assert.IsNotNull(resultingCollection.SingleOrDefault(x => x.Value == newValue2), "Resulting collection must contain the entry with the new value");
+        }
+
+        [TestMethod]
+        public void MustNotRemoveItemsWhenAdding()
+        {
+            var originalCollection = GetOriginalCollection();
+            var keyProperties = GetKeyPropertiesMock();
+            var newCollection = GetOriginalCollection();
+
+            var newEntry = new TestClass { Value = "New entry" };
+            newCollection.Add(newEntry);
+
+            // Run test
+            IList<TestClass> removedEntries = null;
+            var resultingCollection = Merge(originalCollection, newCollection, keyProperties, ref removedEntries);
+
+            Assert.IsNull(removedEntries, "Not supposed to remove any entries when simply adding new entries");
+        }
+
+        [TestMethod]
+        public void MustAdd1Item()
+        {
+            var originalCollection = GetOriginalCollection();
+            var keyProperties = GetKeyPropertiesMock();
+            var newCollection = GetOriginalCollection();
+
+            var newEntry = new TestClass { Value = "New entry" };
+            newCollection.Add(newEntry);
+
+            // Run test
+            var resultingCollection = Merge(originalCollection, newCollection, keyProperties);
+
+            Assert.AreEqual(4, resultingCollection.Count);
+            Assert.IsTrue(resultingCollection.Contains(newEntry), "Resulting collection is supposed to contain the new entry");
+        }
+
+        [TestMethod]
+        public void MustAddMultipleItems()
+        {
+            var originalCollection = GetOriginalCollection();
+            var keyProperties = GetKeyPropertiesMock();
+            var newCollection = GetOriginalCollection();
+
+            var newEntry = new TestClass { Value = "New entry" };
+            var newEntryToo = new TestClass { Value = "New entry, Too" };
+            newCollection.Add(newEntry);
+
+            // Run test
+            var resultingCollection = Merge(originalCollection, newCollection, keyProperties);
+
+            Assert.AreEqual(4, resultingCollection.Count);
+            Assert.IsTrue(resultingCollection.Contains(newEntry), "Resulting collection is supposed to contain the new entry");
+            Assert.IsTrue(resultingCollection.Contains(newEntryToo), "Resulting collection is supposed to contain the new entry");
+        }
+
+
+        private List<TestClass> GetOriginalCollection()
         {
             return new List<TestClass>()
             {
@@ -28,6 +220,30 @@ namespace RepositoryTests
                 new TestClass { Id = 2, Value = "target 2" },
                 new TestClass { Id = 3, Value = "target 3" }
             };
+        }
+
+        private List<TestClass> GetNewCollection_OneItem()
+        {
+            return new List<TestClass>()
+            {
+                new TestClass { Id = 1,Value = "target 1" }
+            };
+        }
+
+        private List<IEntityKeyPropertyInfo> GetKeyPropertiesMock()
+        {
+            var keyMoq = new Moq.Mock<IEntityKeyPropertyInfo>();
+
+            var idProperty = typeof(TestClass).GetProperty(nameof(TestClass.Id));
+            keyMoq.Setup(x => x.PropertyInfo).Returns(idProperty);
+            keyMoq.Setup(x => x.IsForeignKey).Returns(false);
+
+            var keyProperties = new List<IEntityKeyPropertyInfo>
+            {
+                keyMoq.Object
+            };
+
+            return keyProperties;
         }
 
         /// <summary>
@@ -52,116 +268,11 @@ namespace RepositoryTests
             return result;
         }
 
-        private IList<TestClass> DefaultTest(IList<TestClass> originalCollection, IList<TestClass> newCollection, IList<IEntityKeyPropertyInfo> keyPropertyInfo,
-            int expectedNumberOfRemovedItems)
+        private List<TestClass> Merge(IList<TestClass> original, IList<TestClass> newCollection, IList<IEntityKeyPropertyInfo> keyPropertyInfo)
         {
-            // Run test
             IList<TestClass> removedEntries = null;
-            var resultingCollection = Merge(originalCollection, newCollection, keyPropertyInfo, ref removedEntries);
-            if (removedEntries == null) removedEntries = new List<TestClass>();
-
-
-            // Check results
-
-            Assert.AreEqual(newCollection.Count, resultingCollection.Count, "Resulting collection is supposed to have the same amount of entries as the New Collection");
-            Assert.AreEqual(expectedNumberOfRemovedItems, removedEntries.Count, "Removed wrong number of entries");
-
-            // TODO: move these out:
-
-            // Make sure removed entries are not present in the Resulting collection
-            foreach (var item in removedEntries)
-            {
-                Assert.IsTrue(resultingCollection.Count(x => x == item) == 0, "Removed collection contains entries from the Resulting collection");
-            }
-
-            // Make sure entities are only removed from the Target collection (not removed from the New collection)
-            foreach (var item in removedEntries)
-            {
-                Assert.IsTrue(newCollection.Count(x => x == item) == 0, "Removed collection contains entries from the New collection");
-            }
-
-            return resultingCollection;
+            return Merge(original, newCollection, keyPropertyInfo, ref removedEntries);
         }
-
-        /*public void EachEntryInResultingCollectionMustHaveNoMoreThanOneMatchInNewOrOriginalCollection()
-        {
-            // Make sure each entry in Resulting collection has no more than one match in the New or Original collection
-            foreach (var item in resultingCollection)
-            {
-                Assert.IsFalse(newCollection.Count(x => x == item) > 1, "Entry in Resulting collection has more than 1 match in New collection");
-                Assert.IsFalse(originalCollection.Count(x => x == item) > 1, "Entry in Resulting collection has more than 1 match in Original collection");
-
-                Assert.IsNotNull(newCollection.SingleOrDefault(x => x == item)
-                    ?? originalCollection.SingleOrDefault(x => x == item),
-                    "Resulting collection doesn't contain items that aren't present in the new collection");
-            }
-        }*/
-
-        [TestMethod]
-        public void MustRemove2Items()
-        {
-            var newCollection = new List<TestClass>()
-            {
-                new TestClass { Id = 1,Value = "target 1" }
-            };
-            var keyMoq = new Moq.Mock<IEntityKeyPropertyInfo>();
-            var idInfo = typeof(TestClass).GetProperty(nameof(TestClass.Id));
-            keyMoq.Setup(x => x.PropertyInfo).Returns(idInfo);
-            keyMoq.Setup(x => x.IsForeignKey).Returns(false);
-
-            var keys = new List<IEntityKeyPropertyInfo>
-            {
-                keyMoq.Object
-            };
-            
-            DefaultTest(GenerateOriginalCollection(), newCollection, keys, 2);
-        }
-
-        //[TestMethod]
-        //public void RemoveAll()
-        //{
-        //    var newCollection = new List<TestClass>();
-        //    var resultingCollection = DefaultTest(GenerateOriginalCollection(), newCollection, 3);
-        //}
-
-        //[TestMethod]
-        //public void RemoveAllAndAdd1()
-        //{
-        //    var newCollection = new List<TestClass>()
-        //    {
-        //        new TestClass { Id = 0,Value = "target 2" }
-        //    };
-        //    var resultingCollection = DefaultTest(GenerateOriginalCollection(), newCollection, 3);
-        //}
-
-        //[TestMethod]
-        //public void Update1()
-        //{
-        //    var newCollection = GenerateOriginalCollection();
-        //    newCollection[1].Value = "New value";
-        //    var resultingCollection = DefaultTest(GenerateOriginalCollection(), newCollection, 0);
-        //}
-
-        //[TestMethod]
-        //public void Add1()
-        //{
-        //    var newCollection = GenerateOriginalCollection();
-        //    newCollection.Add(new TestClass { Value = "New entry" });
-        //    var resultingCollection = DefaultTest(GenerateOriginalCollection(), newCollection, 0);
-
-        //    Assert.IsTrue(resultingCollection.Count == 4);
-        //}
-
-        //[TestMethod]
-        //public void Add2()
-        //{
-        //    var newCollection = GenerateOriginalCollection();
-        //    newCollection.Add(new TestClass { Value = "New entry" });
-        //    newCollection.Add(new TestClass { Value = "New entry 2" });
-        //    var resultingCollection = DefaultTest(GenerateOriginalCollection(), newCollection, 0);
-
-        //    Assert.IsTrue(resultingCollection.Count == 5);
-        //}
     }
 
     internal class TestClass
@@ -169,5 +280,4 @@ namespace RepositoryTests
         public int Id { get; set; }
         public string Value { get; set; }
     }
-
 }
