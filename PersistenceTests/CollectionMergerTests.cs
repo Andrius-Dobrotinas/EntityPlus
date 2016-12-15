@@ -2,13 +2,11 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
-using AndrewD.EntityPlus.Persistence;
-using AndrewD.EntityPlus;
 
-namespace RepositoryTests
+namespace AndrewD.EntityPlus.Persistence
 {
     [TestClass]
-    public class CollectionMergerTests
+    public partial class CollectionMergerTests
     {
         ICollectionMerger merger;
 
@@ -24,9 +22,9 @@ namespace RepositoryTests
         {
             var originalCollection = GetOriginalCollection();
             var keyProperties = GetKeyPropertiesMock();
-            var newCollection = new List<TestClass>()
+            var newCollection = new List<FakeClass>()
             {
-                new TestClass { Id = 1,Value = "target 1" }
+                new FakeClass { Id = 1,Value = "target 1" }
             };
 
 
@@ -54,7 +52,7 @@ namespace RepositoryTests
             var expectedNumberOfRemovedItems = 2;
 
             // Run test
-            IList<TestClass> removedEntries = null;
+            IList<FakeClass> removedEntries = null;
             var resultingCollection = Merge(originalCollection, newCollection, keyProperties, ref removedEntries);
 
             Assert.IsNotNull(removedEntries, "Entries are supposed to be removed");
@@ -78,7 +76,7 @@ namespace RepositoryTests
             var newCollection = GetNewCollection_OneItem();
 
             // Run test
-            IList<TestClass> removedEntries = null;
+            IList<FakeClass> removedEntries = null;
             var resultingCollection = Merge(originalCollection, newCollection, keyProperties, ref removedEntries);
             
             foreach (var item in removedEntries)
@@ -94,9 +92,9 @@ namespace RepositoryTests
             var keyProperties = GetKeyPropertiesMock();
             
             // New collectain contains an items that's not present in the original collection (different Id)
-            var newCollection = new List<TestClass>()
+            var newCollection = new List<FakeClass>()
             {
-                new TestClass { Id = 0,Value = "target 2" }
+                new FakeClass { Id = 0,Value = "target 2" }
             };
 
             // Run test
@@ -117,7 +115,7 @@ namespace RepositoryTests
             newCollection[1].Value = newValue;
 
             // Run test
-            IList<TestClass> removedEntries = null;
+            IList<FakeClass> removedEntries = null;
             var resultingCollection = Merge(originalCollection, newCollection, keyProperties, ref removedEntries);
 
             Assert.IsNull(removedEntries, "Not supposed to remove any entries when simply updating existing entries");
@@ -165,11 +163,11 @@ namespace RepositoryTests
             var keyProperties = GetKeyPropertiesMock();
             var newCollection = GetOriginalCollection();
 
-            var newEntry = new TestClass { Value = "New entry" };
+            var newEntry = new FakeClass { Value = "New entry" };
             newCollection.Add(newEntry);
 
             // Run test
-            IList<TestClass> removedEntries = null;
+            IList<FakeClass> removedEntries = null;
             var resultingCollection = Merge(originalCollection, newCollection, keyProperties, ref removedEntries);
 
             Assert.IsNull(removedEntries, "Not supposed to remove any entries when simply adding new entries");
@@ -182,7 +180,7 @@ namespace RepositoryTests
             var keyProperties = GetKeyPropertiesMock();
             var newCollection = GetOriginalCollection();
 
-            var newEntry = new TestClass { Value = "New entry" };
+            var newEntry = new FakeClass { Value = "New entry" };
             newCollection.Add(newEntry);
 
             // Run test
@@ -199,85 +197,17 @@ namespace RepositoryTests
             var keyProperties = GetKeyPropertiesMock();
             var newCollection = GetOriginalCollection();
 
-            var newEntry = new TestClass { Value = "New entry" };
-            var newEntryToo = new TestClass { Value = "New entry, Too" };
+            var newEntry = new FakeClass { Value = "New entry" };
+            var newEntryToo = new FakeClass { Value = "New entry, Too" };
             newCollection.Add(newEntry);
+            newCollection.Add(newEntryToo);
 
             // Run test
             var resultingCollection = Merge(originalCollection, newCollection, keyProperties);
 
-            Assert.AreEqual(4, resultingCollection.Count);
+            Assert.AreEqual(5, resultingCollection.Count);
             Assert.IsTrue(resultingCollection.Contains(newEntry), "Resulting collection is supposed to contain the new entry");
-            Assert.IsTrue(resultingCollection.Contains(newEntryToo), "Resulting collection is supposed to contain the new entry");
+            Assert.IsTrue(resultingCollection.Contains(newEntryToo), "Resulting collection is supposed to contain the second new entry");
         }
-
-
-        private List<TestClass> GetOriginalCollection()
-        {
-            return new List<TestClass>()
-            {
-                new TestClass { Id = 1, Value = "target 1" },
-                new TestClass { Id = 2, Value = "target 2" },
-                new TestClass { Id = 3, Value = "target 3" }
-            };
-        }
-
-        private List<TestClass> GetNewCollection_OneItem()
-        {
-            return new List<TestClass>()
-            {
-                new TestClass { Id = 1,Value = "target 1" }
-            };
-        }
-
-        private List<IEntityKeyPropertyInfo> GetKeyPropertiesMock()
-        {
-            var keyMoq = new Moq.Mock<IEntityKeyPropertyInfo>();
-
-            var idProperty = typeof(TestClass).GetProperty(nameof(TestClass.Id));
-            keyMoq.Setup(x => x.PropertyInfo).Returns(idProperty);
-            keyMoq.Setup(x => x.IsForeignKey).Returns(false);
-
-            var keyProperties = new List<IEntityKeyPropertyInfo>
-            {
-                keyMoq.Object
-            };
-
-            return keyProperties;
-        }
-
-        /// <summary>
-        /// Performs a simple collection merge and returns the resulting collection
-        /// </summary>
-        /// <param name="removedEntries">Collection of entries that have been removed from the Original collection</param>
-        /// <returns>New collection which is a result of a merge</returns>
-        private List<TestClass> Merge(IList<TestClass> original, IList<TestClass> newCollection, IList<IEntityKeyPropertyInfo> keyPropertyInfo, ref IList<TestClass> removedEntries)
-        {
-            IList<TestClass> removed = null;
-            var result = merger.MergeCollections<TestClass>(original, newCollection,
-                keyPropertyInfo,
-                (origEntity, newEntity) =>
-                {
-                    origEntity.Value = newEntity.Value;
-                    return origEntity;
-                },
-                newEntity => newEntity,
-                toRemove => removed = toRemove);
-
-            removedEntries = removed;
-            return result;
-        }
-
-        private List<TestClass> Merge(IList<TestClass> original, IList<TestClass> newCollection, IList<IEntityKeyPropertyInfo> keyPropertyInfo)
-        {
-            IList<TestClass> removedEntries = null;
-            return Merge(original, newCollection, keyPropertyInfo, ref removedEntries);
-        }
-    }
-
-    internal class TestClass
-    {
-        public int Id { get; set; }
-        public string Value { get; set; }
     }
 }
