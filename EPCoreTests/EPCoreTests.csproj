@@ -69,7 +69,9 @@
   <ItemGroup>
     <Compile Include="DbContextReflectorTests.cs" />
     <Compile Include="EntityComparerByKeysTests.CompositeKey.cs" />
+    <Compile Include="EntityComparerByNonForeignKeys.cs" />
     <Compile Include="EntityComparerByKeysTests.SingleKey.cs" />
+    <Compile Include="FakeClass.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

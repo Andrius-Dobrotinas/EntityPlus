@@ -85,11 +85,4 @@ namespace AndrewD.EntityPlus
             return keyProperties;
         }
     }
-
-    internal class FakeClass
-    {
-        public int Id { get; set; }
-        public string Value { get; set; }
-        public double DoubleValue { get; set; }
-    }
 }
